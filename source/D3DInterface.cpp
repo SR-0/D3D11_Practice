@@ -165,6 +165,10 @@ bool D3DInterface::initializeScene(class Window* window)
 	hr = d3d11Device->CreateVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
 	hr = d3d11Device->CreatePixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
 
+	// set vertex and pixel shaders
+	d3d11DeviceContext->VSSetShader(VS, 0, 0);
+	d3d11DeviceContext->PSSetShader(PS, 0, 0);
+
 	// create vertex buffer
 	Vertex vertex[] =
 	{

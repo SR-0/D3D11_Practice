@@ -1,7 +1,4 @@
 ﻿  D3DInterface.cpp
-D:\dev\projects\practice\Windows_Engine\source\D3DInterface.cpp(210,36): warning C4244: '=': conversion from 'unsigned int' to 'FLOAT', possible loss of data
-D:\dev\projects\practice\Windows_Engine\source\D3DInterface.cpp(211,38): warning C4244: '=': conversion from 'unsigned int' to 'FLOAT', possible loss of data
-  winMain.cpp
-  Window.cpp
-  Generating Code...
+D:\dev\projects\practice\Windows_Engine\source\D3DInterface.cpp(214,36): warning C4244: '=': conversion from 'unsigned int' to 'FLOAT', possible loss of data
+D:\dev\projects\practice\Windows_Engine\source\D3DInterface.cpp(215,38): warning C4244: '=': conversion from 'unsigned int' to 'FLOAT', possible loss of data
   Windows_Engine.vcxproj -> D:\dev\projects\practice\Windows_Engine\Debug\Windows_Engine.exe
