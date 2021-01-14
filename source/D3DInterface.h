@@ -1,19 +1,17 @@
 #pragma once
 #pragma comment( lib, "d3d11.lib" )
+#pragma comment( lib, "d3d10.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 #include <d3d11.h>
+#include <d3dcompiler.h>
 
 struct Color
 {
-	Color()
-		:
-		r(0.f),
-		g(0.f),
-		b(0.f),
-		a(0.f)
-	{}
-
-	Color(float r, float g, float b, float a)
+	Color(
+		float r = 0.f, 
+		float g = 0.f, 
+		float b = 0.f, 
+		float a = 0.f)
 		:
 		r(r),
 		g(g),
@@ -29,14 +27,10 @@ struct Color
 
 struct Vector3f
 {
-	Vector3f()
-		:
-		x(0.f),
-		y(0.f),
-		z(0.f)
-	{}
-
-	Vector3f(float x, float y, float z)
+	Vector3f(
+		float x = 0.f, 
+		float y = 0.f, 
+		float z = 0.f)
 		:
 		x(x),
 		y(y),
@@ -50,15 +44,11 @@ struct Vector3f
 
 struct Vector4f
 {
-	Vector4f()
-		:
-		x(0.f),
-		y(0.f),
-		z(0.f),
-		w(0.f)
-	{}
-
-	Vector4f(float x, float y, float z, float w)
+	Vector4f(
+		float x = 0.f, 
+		float y = 0.f, 
+		float z = 0.f, 
+		float w = 0.f)
 		:
 		x(x),
 		y(y),
@@ -74,12 +64,10 @@ struct Vector4f
 
 struct Vertex
 {
-	Vertex()
-		:
-		position(0.f, 0.f, 0.f)
-	{}
-
-	Vertex(float x, float y, float z)
+	Vertex(
+		float x = 0.f, 
+		float y = 0.f, 
+		float z = 0.f)
 		:
 		position(x, y, z)
 	{}
@@ -119,9 +107,14 @@ public:
 
 	bool initializeD3DApp(class Window* window);
 	void releaseObjects();
-	bool initializeScene();
+	bool initializeScene(class Window* window);
 	void updateScene();
 	void drawScene();
+
+public:
+
+	void sceneUpdate_DrawColorChange();
+	void sceneUpdate_DrawTriangle();
 
 private:
 
@@ -129,12 +122,22 @@ private:
 	ID3D11Device*				d3d11Device			= nullptr;
 	ID3D11DeviceContext*		d3d11DeviceContext	= nullptr;
 	ID3D11RenderTargetView*		renderTargetView	= nullptr;
-	D3D11_INPUT_ELEMENT_DESC*	layout				= nullptr;
+	ID3D11Buffer*				triangleVertBuffer	= nullptr;
+	ID3D11VertexShader*			VS					= nullptr;
+	ID3D11PixelShader*			PS					= nullptr;
+	ID3D10Blob*                 VS_Buffer			= nullptr;
+	ID3D10Blob*					PS_Buffer			= nullptr;
+	ID3D11InputLayout*          vertLayout			= nullptr;
+
+public:
+
+	D3D11_INPUT_ELEMENT_DESC*	layout		= nullptr;
+	UINT						numElements	= 0;
 
 private:
 
-	Color	color;
-	Color	colorModifier;
+	Color color;
+	Color colorModifier;
 
 };
 

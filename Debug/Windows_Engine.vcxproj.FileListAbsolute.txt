@@ -1,0 +1,4 @@
+D:\dev\projects\Practice Projects\Windows_Engine\Debug\Windows_Engine.exe
+D:\dev\projects\Practice Projects\Windows_Engine\Debug\Windows_Engine.pdb
+D:\dev\projects\practice\Windows_Engine\Debug\Windows_Engine.exe
+D:\dev\projects\practice\Windows_Engine\Debug\Windows_Engine.pdb

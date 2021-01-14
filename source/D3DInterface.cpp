@@ -1,6 +1,7 @@
 #include "D3DInterface.h"
 
 #include "Window.h"
+#include <iostream>
 
 D3DInterface::D3DInterface(class Window* window)
 	:
@@ -8,13 +9,16 @@ D3DInterface::D3DInterface(class Window* window)
 	colorModifier(Color(1.f, 1.f, 1.f, 1.f))
 {
 	initializeD3DApp(window);
-	initializeScene();
+	initializeScene(window);
 
 	// make this better.... SR_0
 	layout = new D3D11_INPUT_ELEMENT_DESC[]
 	{ 
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA }, 
 	};
+
+	std::cout << sizeof(layout) / sizeof(layout[0]) << "\n";
+	numElements = sizeof(layout) / sizeof(layout[0]);
 }
 
 D3DInterface::~D3DInterface()
@@ -140,15 +144,94 @@ void D3DInterface::releaseObjects()
 	swapChain->Release();
 	d3d11Device->Release();
 	d3d11DeviceContext->Release();
+	renderTargetView->Release();
+	triangleVertBuffer->Release();
+	VS->Release();
+	PS->Release();
+	VS_Buffer->Release();
+	PS_Buffer->Release();
+	vertLayout->Release();
 }
 
-bool D3DInterface::initializeScene()
+bool D3DInterface::initializeScene(class Window* window)
 {
+	HRESULT hr;
+
+	// compile shaders from shader file
+	hr = D3DCompileFromFile(L"shaders/VSTest.hlsl", 0, 0, "VS", "vs_5_0", 0, 0, 0, &VS_Buffer);
+	hr = D3DCompileFromFile(L"shaders/PSTest.hlsl", 0, 0, "PS", "ps_5_0", 0, 0, 0, &PS_Buffer);
+
+	// create the shader objects
+	hr = d3d11Device->CreateVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
+	hr = d3d11Device->CreatePixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
+
+	// create vertex buffer
+	Vertex vertex[] =
+	{
+		Vertex(0.0f, 0.0f, 0.0f),
+		Vertex(0.0f, 0.0f, 0.0f),
+		Vertex(0.0f, 0.0f, 0.0f)
+	};
+
+	D3D11_BUFFER_DESC vertexBufferDescription;
+	ZeroMemory(&vertexBufferDescription, sizeof(D3D11_BUFFER_DESC /*vertexBufferDescription*/));
+
+	vertexBufferDescription.Usage			= D3D11_USAGE_DEFAULT;
+	vertexBufferDescription.ByteWidth		= sizeof(Vertex) * 3;
+	vertexBufferDescription.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDescription.CPUAccessFlags	= 0;
+	vertexBufferDescription.MiscFlags		= 0;
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData;
+	ZeroMemory(&vertexBufferData, sizeof(D3D11_SUBRESOURCE_DATA /*vertexBufferData*/)); // // //
+	vertexBufferData.pSysMem = vertex;
+	hr = d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &triangleVertBuffer);
+
+	// set vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	d3d11DeviceContext->IASetVertexBuffers(0, 1, &triangleVertBuffer, &stride, &offset);
+
+	// create input layout
+	hr = d3d11Device->CreateInputLayout(layout, numElements, VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), &vertLayout);
+
+	// set input layout
+	d3d11DeviceContext->IASetInputLayout(vertLayout);
+
+	// set primitive topology
+	d3d11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// create viewport
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+	viewport.TopLeftX	= 0;
+	viewport.TopLeftY	= 0;
+	viewport.Width		= window->getWidth();
+	viewport.Height		= window->getHeight();
+
+	// set viewport
+	d3d11DeviceContext->RSSetViewports(1, &viewport);
 
 	return true;
 }
 
 void D3DInterface::updateScene()
+{
+	sceneUpdate_DrawColorChange();
+}
+
+void D3DInterface::drawScene()
+{
+	// clear backbuffer to updated color
+	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
+	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+
+	// present backbuffer to screen
+	swapChain->Present(0, 0);
+}
+
+void D3DInterface::sceneUpdate_DrawColorChange()
 {
 	// update silly colors
 	color.r += colorModifier.r * 0.00005f;
@@ -171,12 +254,12 @@ void D3DInterface::updateScene()
 	}
 }
 
-void D3DInterface::drawScene()
+void D3DInterface::sceneUpdate_DrawTriangle()
 {
-	// clear backbuffer to updated color
-	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
-	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+	float backgroundColor[4] = { color.r, color.g, color.b, color.a };
 
-	// present backbuffer to screen
+	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+	d3d11DeviceContext->Draw(3, 0);
 	swapChain->Present(0, 0);
+
 }
