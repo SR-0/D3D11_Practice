@@ -113,7 +113,7 @@ bool D3DInterface::initializeD3DApp(class Window* window)
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
-		NULL,
+		D3D11_CREATE_DEVICE_DEBUG,
 		NULL,
 		NULL,
 		D3D11_SDK_VERSION,
@@ -158,8 +158,8 @@ bool D3DInterface::initializeScene(class Window* window)
 	HRESULT hr;
 
 	// compile shaders from shader file
-	hr = D3DCompileFromFile(L"shaders/VSTest.hlsl", 0, 0, "VS", "vs_5_0", 0, 0, 0, &VS_Buffer);
-	hr = D3DCompileFromFile(L"shaders/PSTest.hlsl", 0, 0, "PS", "ps_5_0", 0, 0, 0, &PS_Buffer);
+	hr = D3DCompileFromFile(L"resource/shaders/VSTest.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr);
+	hr = D3DCompileFromFile(L"resource/shaders/PSTest.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr);
 
 	// create the shader objects
 	hr = d3d11Device->CreateVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
@@ -216,6 +216,8 @@ bool D3DInterface::initializeScene(class Window* window)
 
 	// set viewport
 	d3d11DeviceContext->RSSetViewports(1, &viewport);
+	d3d11DeviceContext->VSSetShader(VS, nullptr, 0);
+	d3d11DeviceContext->PSSetShader(PS, nullptr, 0);
 
 	return true;
 }
@@ -230,6 +232,9 @@ void D3DInterface::drawScene()
 	// clear backbuffer to updated color
 	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
 	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+
+	// draw triangle
+	sceneUpdate_DrawTriangle();
 
 	// present backbuffer to screen
 	swapChain->Present(0, 0);
@@ -260,10 +265,30 @@ void D3DInterface::sceneUpdate_DrawColorChange()
 
 void D3DInterface::sceneUpdate_DrawTriangle()
 {
-	float backgroundColor[4] = { color.r, color.g, color.b, color.a };
+	// set vertex buffer
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	d3d11DeviceContext->IASetVertexBuffers(0, 1, &triangleVertBuffer, &stride, &offset);
 
-	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+	// set input layout
+	d3d11DeviceContext->IASetInputLayout(vertLayout);
+
+	// set primitive topology
+	d3d11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// create viewport
+	D3D11_VIEWPORT viewport;
+	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+	viewport.TopLeftX	= 0;
+	viewport.TopLeftY	= 0;
+	viewport.Width		= 800;
+	viewport.Height		= 600;
+
+	// set viewport
+	d3d11DeviceContext->RSSetViewports(1, &viewport);
+	d3d11DeviceContext->VSSetShader(VS, nullptr, 0);
+	d3d11DeviceContext->PSSetShader(PS, nullptr, 0);
+
 	d3d11DeviceContext->Draw(3, 0);
-	swapChain->Present(0, 0);
-
 }
