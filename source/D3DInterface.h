@@ -28,8 +28,8 @@ public: // all initialization, setup, and destruction
 
 private: // specific initialization functions
 
-	bool initializeD3D(class Window* window);		// initialize
-	bool initializeScene(class Window* window);		// setup
+	bool initializeD3D(class Window* window);
+	bool initializeScene(class Window* window);
 
 private: // specific setup functions
 
@@ -37,7 +37,7 @@ private: // specific setup functions
 
 private: // specific destruction functions
 
-	void releaseObjects();							// destruct
+	void releaseObjects();
 
 public: // all update & render funcitons
 
