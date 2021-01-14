@@ -1,112 +1,68 @@
 #include "D3DInterface.h"
 
+// local includes
 #include "Window.h"
-#include <iostream>
 
 D3DInterface::D3DInterface(class Window* window)
 	:
 	color(Color(0.f, 0.f, 0.f, 1.f)),
 	colorModifier(Color(1.f, 1.f, 1.f, 1.f))
 {
-	initializeD3DApp(window);
-	initializeScene(window);
-
-	// make this better.... SR_0
-	layout = new D3D11_INPUT_ELEMENT_DESC[]
-	{ 
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA }, 
-	};
-
-	std::cout << sizeof(layout) / sizeof(layout[0]) << "\n";
-	numElements = sizeof(layout) / sizeof(layout[0]);
+	initialize(window);
 }
 
 D3DInterface::~D3DInterface()
 {
+	destruct();
+}
+
+void D3DInterface::initialize(Window* window)
+{
+	initializeD3D(window);
+	initializeScene(window);
+}
+
+void D3DInterface::setup()
+{
+	// none atm
+}
+
+void D3DInterface::destruct()
+{
 	releaseObjects();
-	
+
 	// make this better.... SR_0
 	delete layout;
 }
 
-DXGI_MODE_DESC D3DInterface::createBufferDescription(
-	unsigned int				width,
-	unsigned int				height,
-	unsigned int				refreshRateNumerator,
-	unsigned int				refreshRateDenominator,
-	DXGI_FORMAT					DXGIFormat,
-	DXGI_MODE_SCANLINE_ORDER 	DXGIMScanlineOrder,
-	DXGI_MODE_SCALING			DXGIMScaling)
-{
-	// describe buffer
-	DXGI_MODE_DESC bufferDescription;
-
-	ZeroMemory(&bufferDescription, sizeof(DXGI_MODE_DESC));
-
-	bufferDescription.Width						= width;
-	bufferDescription.Height					= height;
-	bufferDescription.RefreshRate.Numerator		= refreshRateNumerator;
-	bufferDescription.RefreshRate.Denominator	= refreshRateDenominator;
-	bufferDescription.Format					= DXGIFormat;
-	bufferDescription.ScanlineOrdering			= DXGIMScanlineOrder;
-	bufferDescription.Scaling					= DXGIMScaling;
-
-	return bufferDescription;
-}
-
-DXGI_SWAP_CHAIN_DESC D3DInterface::createSwapChainDescription(
-	DXGI_MODE_DESC&		bufferDescription,
-	unsigned int		sampleDescriptionCount,
-	unsigned int		sampleDescriptionQuality,
-	DXGI_USAGE			DXGIUsage,
-	unsigned int		bufferCount,
-	HWND				hWnd,
-	BOOL				isWindowed,
-	DXGI_SWAP_EFFECT	DXGISwapEffect)
-{
-	// describe SwapChain
-	DXGI_SWAP_CHAIN_DESC swapChainDescription;
-
-	ZeroMemory(&swapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
-
-	swapChainDescription.BufferDesc			= bufferDescription;
-	swapChainDescription.SampleDesc.Count	= sampleDescriptionCount;
-	swapChainDescription.SampleDesc.Quality	= sampleDescriptionQuality;
-	swapChainDescription.BufferUsage		= DXGIUsage;
-	swapChainDescription.BufferCount		= bufferCount;
-	swapChainDescription.OutputWindow       = hWnd;
-	swapChainDescription.Windowed			= isWindowed;
-	swapChainDescription.SwapEffect			= DXGISwapEffect;
-
-	return swapChainDescription;
-}
-
-bool D3DInterface::initializeD3DApp(class Window* window)
+bool D3DInterface::initializeD3D(class Window* window)
 {
 	HRESULT hResult;
 
 	// describe buffer
-	DXGI_MODE_DESC bufferDescription = createBufferDescription(
-		window->getWidth(),
-		window->getHeight(),
-		60,
-		1,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED,
-		DXGI_MODE_SCALING_UNSPECIFIED
-	);
+	DXGI_MODE_DESC bufferDescription;
+	ZeroMemory(&bufferDescription, sizeof(DXGI_MODE_DESC));
+
+	bufferDescription.Width						= window->getWidth();
+	bufferDescription.Height					= window->getHeight();
+	bufferDescription.RefreshRate.Numerator		= 60;
+	bufferDescription.RefreshRate.Denominator	= 1;
+	bufferDescription.Format					= DXGI_FORMAT_R8G8B8A8_UNORM;
+	bufferDescription.ScanlineOrdering			= DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	bufferDescription.Scaling					= DXGI_MODE_SCALING_UNSPECIFIED;
 
 	// describe SwapChain
-	DXGI_SWAP_CHAIN_DESC swapChainDescription = createSwapChainDescription(
-		bufferDescription,
-		1,
-		0,
-		DXGI_USAGE_RENDER_TARGET_OUTPUT,
-		1,
-		window->getHandle(),
-		TRUE,
-		DXGI_SWAP_EFFECT_DISCARD
-	);
+	DXGI_SWAP_CHAIN_DESC swapChainDescription;
+	ZeroMemory(&swapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
+
+	swapChainDescription.BufferDesc			= bufferDescription;
+	swapChainDescription.SampleDesc.Count	= 1;
+	swapChainDescription.SampleDesc.Quality	= 0;
+	swapChainDescription.BufferUsage		= DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDescription.BufferCount		= 1;
+	swapChainDescription.OutputWindow       = window->getHandle();
+	swapChainDescription.Windowed			= TRUE;
+	swapChainDescription.SwapEffect			= DXGI_SWAP_EFFECT_DISCARD;
 
 	// create swapChain
 	hResult = D3D11CreateDeviceAndSwapChain(
@@ -132,25 +88,7 @@ bool D3DInterface::initializeD3DApp(class Window* window)
 	hResult = d3d11Device->CreateRenderTargetView(backBuffer, NULL, &renderTargetView);
 	backBuffer->Release();
 
-	// set render target
-	d3d11DeviceContext->OMSetRenderTargets(1, &renderTargetView, NULL);
-
 	return true;
-}
-
-void D3DInterface::releaseObjects()
-{
-	// release COM objects
-	swapChain->Release();
-	d3d11Device->Release();
-	d3d11DeviceContext->Release();
-	renderTargetView->Release();
-	triangleVertBuffer->Release();
-	VS->Release();
-	PS->Release();
-	VS_Buffer->Release();
-	PS_Buffer->Release();
-	vertLayout->Release();
 }
 
 bool D3DInterface::initializeScene(class Window* window)
@@ -172,13 +110,13 @@ bool D3DInterface::initializeScene(class Window* window)
 	// create vertex buffer
 	Vertex vertex[] =
 	{
-		Vertex(0.0f, 0.0f, 0.0f),
-		Vertex(0.0f, 0.0f, 0.0f),
-		Vertex(0.0f, 0.0f, 0.0f)
+		Vertex(-1.0f, -1.0f, 0.0f),
+		Vertex( 0.0f,  1.0f, 0.0f),
+		Vertex( 1.0f, -1.0f, 0.0f)
 	};
 
 	D3D11_BUFFER_DESC vertexBufferDescription;
-	ZeroMemory(&vertexBufferDescription, sizeof(D3D11_BUFFER_DESC /*vertexBufferDescription*/));
+	ZeroMemory(&vertexBufferDescription, sizeof(D3D11_BUFFER_DESC));
 
 	vertexBufferDescription.Usage			= D3D11_USAGE_DEFAULT;
 	vertexBufferDescription.ByteWidth		= sizeof(Vertex) * 3;
@@ -187,60 +125,48 @@ bool D3DInterface::initializeScene(class Window* window)
 	vertexBufferDescription.MiscFlags		= 0;
 
 	D3D11_SUBRESOURCE_DATA vertexBufferData;
-	ZeroMemory(&vertexBufferData, sizeof(D3D11_SUBRESOURCE_DATA /*vertexBufferData*/)); // // //
+	ZeroMemory(&vertexBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
 	vertexBufferData.pSysMem = vertex;
 	hr = d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &triangleVertBuffer);
 
-	// set vertex buffer
-	UINT stride = sizeof(Vertex);
-	UINT offset = 0;
-	d3d11DeviceContext->IASetVertexBuffers(0, 1, &triangleVertBuffer, &stride, &offset);
-
 	// create input layout
-	hr = d3d11Device->CreateInputLayout(layout, numElements, VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), &vertLayout);
-
-	// set input layout
-	d3d11DeviceContext->IASetInputLayout(vertLayout);
-
-	// set primitive topology
-	d3d11DeviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// create viewport
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-
-	viewport.TopLeftX	= 0;
-	viewport.TopLeftY	= 0;
-	viewport.Width		= window->getWidth();
-	viewport.Height		= window->getHeight();
-
-	// set viewport
-	d3d11DeviceContext->RSSetViewports(1, &viewport);
-	d3d11DeviceContext->VSSetShader(VS, nullptr, 0);
-	d3d11DeviceContext->PSSetShader(PS, nullptr, 0);
+	layout = new D3D11_INPUT_ELEMENT_DESC[]
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA },
+	};
+	hr = d3d11Device->CreateInputLayout(layout, 1, VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), &vertLayout);
 
 	return true;
 }
 
-void D3DInterface::updateScene()
+void D3DInterface::releaseObjects()
 {
-	sceneUpdate_DrawColorChange();
+	// release COM objects
+	swapChain->Release();
+	d3d11Device->Release();
+	d3d11DeviceContext->Release();
+	renderTargetView->Release();
+	triangleVertBuffer->Release();
+	VS->Release();
+	PS->Release();
+	VS_Buffer->Release();
+	PS_Buffer->Release();
+	vertLayout->Release();
 }
 
-void D3DInterface::drawScene()
+void D3DInterface::update()
 {
-	// clear backbuffer to updated color
-	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
-	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
-
-	// draw triangle
-	sceneUpdate_DrawTriangle();
-
-	// present backbuffer to screen
-	swapChain->Present(0, 0);
+	updateBackgroundColor();
 }
 
-void D3DInterface::sceneUpdate_DrawColorChange()
+void D3DInterface::render()
+{
+	clear();
+	draw();
+	display();
+}
+
+void D3DInterface::updateBackgroundColor()
 {
 	// update silly colors
 	color.r += colorModifier.r * 0.00005f;
@@ -263,7 +189,26 @@ void D3DInterface::sceneUpdate_DrawColorChange()
 	}
 }
 
-void D3DInterface::sceneUpdate_DrawTriangle()
+void D3DInterface::clear()
+{
+	// clear backbuffer to updated color
+	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
+	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+}
+
+void D3DInterface::draw()
+{
+	// draw scene
+	drawTriangle();
+}
+
+void D3DInterface::display()
+{
+	// present backbuffer to screen
+	swapChain->Present(0, 0);
+}
+
+void D3DInterface::drawTriangle()
 {
 	// set vertex buffer
 	UINT stride = sizeof(Vertex);
@@ -284,9 +229,13 @@ void D3DInterface::sceneUpdate_DrawTriangle()
 	viewport.TopLeftY	= 0;
 	viewport.Width		= 800;
 	viewport.Height		= 600;
+	viewport.MaxDepth	= 1.f;
 
 	// set viewport
 	d3d11DeviceContext->RSSetViewports(1, &viewport);
+
+	d3d11DeviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
+
 	d3d11DeviceContext->VSSetShader(VS, nullptr, 0);
 	d3d11DeviceContext->PSSetShader(PS, nullptr, 0);
 

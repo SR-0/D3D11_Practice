@@ -1,122 +1,64 @@
 #pragma once
+
+// lib links
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3d10.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
+
+// d3d includes
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
-struct Color
-{
-	Color(
-		float r = 0.f, 
-		float g = 0.f, 
-		float b = 0.f, 
-		float a = 0.f)
-		:
-		r(r),
-		g(g),
-		b(b),
-		a(a)
-	{}
+// local includes
+#include "CustomTypes.h"
 
-	float	r;
-	float	g;
-	float	b;
-	float   a;
-};
-
-struct Vector3f
-{
-	Vector3f(
-		float x = 0.f, 
-		float y = 0.f, 
-		float z = 0.f)
-		:
-		x(x),
-		y(y),
-		z(z)
-	{}
-
-	float	x;
-	float	y;
-	float	z;
-};
-
-struct Vector4f
-{
-	Vector4f(
-		float x = 0.f, 
-		float y = 0.f, 
-		float z = 0.f, 
-		float w = 0.f)
-		:
-		x(x),
-		y(y),
-		z(z),
-		w(w)
-	{}
-
-	float	x;
-	float	y;
-	float	z;
-	float	w;
-};
-
-struct Vertex
-{
-	Vertex(
-		float x = 0.f, 
-		float y = 0.f, 
-		float z = 0.f)
-		:
-		position(x, y, z)
-	{}
-
-	Vector3f position;
-};
 
 class D3DInterface
 {
-public:
+public: // constructors and destructors
 
 	D3DInterface(class Window* window);
 	~D3DInterface();
 
-private:
+public: // all initialization, setup, and destruction
 
-	DXGI_MODE_DESC createBufferDescription(
-		unsigned int				width,
-		unsigned int				height,
-		unsigned int				refreshRateNumerator,
-		unsigned int				refreshRateDenominator,
-		DXGI_FORMAT					DXGIFormat,
-		DXGI_MODE_SCANLINE_ORDER 	DXGIMScanlineOrder,
-		DXGI_MODE_SCALING			DXGIMScaling);
+	void initialize(class Window* window);
+	void setup();
+	void destruct();
 
-	DXGI_SWAP_CHAIN_DESC createSwapChainDescription(
-		DXGI_MODE_DESC&		bufferDescription,
-		unsigned int		sampleDescriptionCount,
-		unsigned int		sampleDescriptionQuality,
-		DXGI_USAGE			DXGIUsage,
-		unsigned int		bufferCount,
-		HWND				hWnd,
-		BOOL				isWindowed,
-		DXGI_SWAP_EFFECT	DXGISwapEffect);
+private: // specific initialization functions
 
-public:
+	bool initializeD3D(class Window* window);		// initialize
+	bool initializeScene(class Window* window);		// setup
 
-	bool initializeD3DApp(class Window* window);
-	void releaseObjects();
-	bool initializeScene(class Window* window);
-	void updateScene();
-	void drawScene();
+private: // specific setup functions
 
-public:
+	// empty atm
 
-	void sceneUpdate_DrawColorChange();
-	void sceneUpdate_DrawTriangle();
+private: // specific destruction functions
 
-private:
+	void releaseObjects();							// destruct
+
+public: // all update & render funcitons
+
+	void update(); 
+	void render(); 
+
+public: // specific update functions
+
+	void updateBackgroundColor();
+
+public: // specific render functions
+
+	void clear();
+	void draw();
+	void display();
+
+public: // specific draw functions
+
+	void drawTriangle();
+
+private: // all COM objects
 
 	IDXGISwapChain*				swapChain			= nullptr;
 	ID3D11Device*				d3d11Device			= nullptr;
@@ -128,16 +70,11 @@ private:
 	ID3D10Blob*                 VS_Buffer			= nullptr;
 	ID3D10Blob*					PS_Buffer			= nullptr;
 	ID3D11InputLayout*          vertLayout			= nullptr;
+	D3D11_INPUT_ELEMENT_DESC*	layout				= nullptr;
 
-public:
-
-	D3D11_INPUT_ELEMENT_DESC*	layout		= nullptr;
-	UINT						numElements	= 0;
-
-private:
+private: // misc variables
 
 	Color color;
 	Color colorModifier;
 
 };
-

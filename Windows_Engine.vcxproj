@@ -153,6 +153,7 @@
     <ClCompile Include="source\WindowsMessageMap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\CustomTypes.h" />
     <ClInclude Include="source\D3DInterface.h" />
     <ClInclude Include="source\Window.h" />
     <ClInclude Include="source\WindowsMessageMap.h" />

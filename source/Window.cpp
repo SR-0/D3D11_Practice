@@ -164,8 +164,8 @@ int Window::messageLoop(class D3DInterface* d3dInterface)
 		}
 		else if (d3dInterface != nullptr)
 		{
-			d3dInterface->updateScene();
-			d3dInterface->drawScene();
+			d3dInterface->update();
+			d3dInterface->render();
 		}
 	}
 
