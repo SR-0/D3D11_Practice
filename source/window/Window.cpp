@@ -2,21 +2,20 @@
 
 #include <string>
 #include "WindowsMessageMap.h"
-#include "D3DInterface.h"
+#include "Graphics.h"
 
 Window::Window(
 	HINSTANCE&   hInstance, 
-	LPCWSTR      wndClassName, 
-	int          nCmdShow,
+	LPCWSTR      windowClassName,
 	unsigned int width,
 	unsigned int height,
 	bool         isFullscreen)
 	:
-	wndClassName(wndClassName),
+	windowClassName(windowClassName),
 	width(width),
 	height(height)
 {
-	initialize(hInstance, nCmdShow, width, height, isFullscreen);
+	initialize(hInstance, width, height, isFullscreen);
 }
 
 Window::~Window()
@@ -25,31 +24,30 @@ Window::~Window()
 
 bool Window::initialize(
 	HINSTANCE&   hInstance,
-	int          nCmdShow,
 	unsigned int width,
 	unsigned int height,
 	bool         isFullscreen)
 {
-	wndClass.style         = CS_HREDRAW | CS_VREDRAW;
-	wndClass.lpfnWndProc   = wndProc;
-	wndClass.cbClsExtra    = NULL;
-	wndClass.cbWndExtra    = NULL;
-	wndClass.hInstance     = hInstance;
-	wndClass.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-	wndClass.hCursor       = LoadCursorW(NULL, IDC_ARROW);
-	wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
-	wndClass.lpszMenuName  = NULL;
-	wndClass.lpszClassName = wndClassName;
+	windowClass.style         = CS_HREDRAW | CS_VREDRAW;
+	windowClass.lpfnWndProc   = wndProc;
+	windowClass.cbClsExtra    = NULL;
+	windowClass.cbWndExtra    = NULL;
+	windowClass.hInstance     = hInstance;
+	windowClass.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+	windowClass.hCursor       = LoadCursorW(NULL, IDC_ARROW);
+	windowClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 2);
+	windowClass.lpszMenuName  = NULL;
+	windowClass.lpszClassName = windowClassName;
 
-	if (!RegisterClass(&wndClass))
+	if (!RegisterClass(&windowClass))
 	{
 		MessageBoxEx(0, L"Window Initialization - Failed", L"Error", MB_OK, CAL_GREGORIAN_XLIT_ENGLISH);
 		return false;
 	}
 
-	hWnd = CreateWindowEx(
+	handle = CreateWindowEx(
 		0,									// optional window styles
-		wndClassName,						// window class
+		windowClassName,						// window class
 		L"Learn to Program with Windows",	// window text
 		WS_OVERLAPPEDWINDOW,				// window style
 		0,									// window position - top
@@ -65,17 +63,17 @@ bool Window::initialize(
 
 	RECT desktop;
 	GetWindowRect(GetDesktopWindow(), &desktop);
-	MoveWindow(hWnd, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, true);
+	MoveWindow(handle, (desktop.right / 2) - (width / 2), (desktop.bottom / 2) - (height / 2), width, height, true);
 
-	if (!hWnd)
+	if (!handle)
 	{
 		MessageBoxEx(0, L"Window Creation - Failed", L"Error", MB_OK, CAL_GREGORIAN_XLIT_ENGLISH);
 		return false;
 	}
 
-	ShowWindow(hWnd, nCmdShow);
+	ShowWindow(handle, SW_SHOW);
 
-	UpdateWindow(hWnd);
+	UpdateWindow(handle);
 
 	return true;
 }
@@ -146,35 +144,29 @@ LRESULT Window::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-int Window::messageLoop(class D3DInterface* d3dInterface)
+int Window::update()
 {
 	MSG msg;
 
 	ZeroMemory(&msg, sizeof(MSG));
 
-	while (true)
+	if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) // check if windows message exists
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) // check if windows message exists
+		if (msg.message == WM_QUIT) // if WM_QUIT, exit message loop
 		{
-			if (msg.message == WM_QUIT) // if WM_QUIT, exit message loop
-				break;
-
+			return (int)msg.wParam;
+		}
+		else
+		{
 			TranslateMessage(&msg); // translate the message
 			DispatchMessage(&msg);  // send the message to default windows procedure
-		}
-		else if (d3dInterface != nullptr)
-		{
-			d3dInterface->update();
-			d3dInterface->render();
-		}
+		};
 	}
-
-	return (int)msg.wParam;
 }
 
 HWND Window::getHandle()
 {
-	return hWnd;
+	return handle;
 }
 
 unsigned int Window::getWidth()

@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;$(SolutionDir)source/core;$(SolutionDir)source/common;$(SolutionDir)source/graphics;$(SolutionDir)source/window</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;$(SolutionDir)source/core;$(SolutionDir)source/common;$(SolutionDir)source/graphics;$(SolutionDir)source/window</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;$(SolutionDir)source/core;$(SolutionDir)source/common;$(SolutionDir)source/graphics;$(SolutionDir)source/window</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,7 +136,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source;$(SolutionDir)source/core;$(SolutionDir)source/common;$(SolutionDir)source/graphics;$(SolutionDir)source/window</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -147,16 +147,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="source\D3DInterface.cpp" />
-    <ClCompile Include="source\winMain.cpp" />
-    <ClCompile Include="source\Window.cpp" />
-    <ClCompile Include="source\WindowsMessageMap.cpp" />
+    <ClCompile Include="source\core\Engine.cpp" />
+    <ClCompile Include="source\graphics\Graphics.cpp" />
+    <ClCompile Include="source\core\winMain.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source\common;$(SolutionDir)source\graphics;$(SolutionDir)source\window;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source\common;$(SolutionDir)source\graphics;$(SolutionDir)source\window;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source\common;$(SolutionDir)source\graphics;$(SolutionDir)source\window;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)include;$(SolutionDir)resource;$(SolutionDir)source\common;$(SolutionDir)source\graphics;$(SolutionDir)source\window;</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="source\window\Window.cpp" />
+    <ClCompile Include="source\window\WindowsMessageMap.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\CustomTypes.h" />
-    <ClInclude Include="source\D3DInterface.h" />
-    <ClInclude Include="source\Window.h" />
-    <ClInclude Include="source\WindowsMessageMap.h" />
+    <ClInclude Include="source\core\Engine.h" />
+    <ClInclude Include="source\common\CustomTypes.h" />
+    <ClInclude Include="source\graphics\Graphics.h" />
+    <ClInclude Include="source\window\Window.h" />
+    <ClInclude Include="source\window\WindowsMessageMap.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

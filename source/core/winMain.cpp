@@ -1,5 +1,4 @@
-#include "Window.h"
-#include "D3DInterface.h"
+#include "Engine.h"
 
 int WINAPI wWinMain(
 	_In_     HINSTANCE hInstance,
@@ -11,9 +10,11 @@ int WINAPI wWinMain(
 	const unsigned int width        = 800;
 	const unsigned int height       = 600;
 
+	Engine engine(hInstance, wndClassName, width, height, false);
+	
+	while (engine.isRunning())
 	{
-		Window* window = new Window(hInstance, wndClassName, nCmdShow, width, height, false);
-		D3DInterface* d3dInterface = new D3DInterface(window);
-		window->messageLoop(d3dInterface);
+		engine.update();
+		engine.render();
 	}
 }

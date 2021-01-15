@@ -15,30 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\winMain.cpp">
+    <ClCompile Include="source\window\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Window.cpp">
+    <ClCompile Include="source\window\WindowsMessageMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\WindowsMessageMap.cpp">
+    <ClCompile Include="source\graphics\Graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\D3DInterface.cpp">
+    <ClCompile Include="source\core\winMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="source\core\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Window.h">
+    <ClInclude Include="source\window\WindowsMessageMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\WindowsMessageMap.h">
+    <ClInclude Include="source\window\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\D3DInterface.h">
+    <ClInclude Include="source\graphics\Graphics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\CustomTypes.h">
+    <ClInclude Include="source\common\CustomTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\core\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

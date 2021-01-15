@@ -7,8 +7,7 @@ public:
 
 	Window(
 		HINSTANCE&   hInstance,
-		LPCWSTR      wndClassName,
-		int          nCmdShow,
+		LPCWSTR      windowClassName,
 		unsigned int width,
 		unsigned int height,
 		bool         isFullscreen);
@@ -19,7 +18,6 @@ private:
 
 	bool initialize(
 		HINSTANCE&   hInstance,
-		int          nCmdShow,
 		unsigned int width,
 		unsigned int height,
 		bool         isFullscreen);
@@ -34,7 +32,7 @@ public:
 
 public:
 
-	int  messageLoop(class D3DInterface* d3dInterface = nullptr);
+	int update();
 
 public:
 
@@ -44,9 +42,9 @@ public:
 
 private:
 
-	WNDCLASS		wndClass		= { };
-	LPCWSTR			wndClassName	= nullptr;
-	HWND			hWnd			= nullptr;
+	WNDCLASS		windowClass		= { };
+	LPCWSTR			windowClassName	= nullptr;
+	HWND			handle			= nullptr;
 	unsigned int	width			= 0;
 	unsigned int	height			= 0;
 	bool			isFullScreen	= false;
