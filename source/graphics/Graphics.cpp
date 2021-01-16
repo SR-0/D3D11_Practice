@@ -125,40 +125,18 @@ bool Graphics::createGraphics(class Window* window)
 bool Graphics::createShaders()
 {
 	// vertext shader creation/initialization
-	createHLSLShader(vertexShader1, L"resource/shaders/vertex/VSBasic.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr, false,
-		"float4 VS(float4 inPos : POSITION) : SV_POSITION\n"
-		"{\n"
-		"	return inPos;\n"
-		"};\n");
+	createHLSLShader(vertexShader1, L"resource/shaders/vertex/VSBasic.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr);
 
 	// pixel shader creation/initialization
-	createHLSLShader(pixelShaderRed, L"resource/shaders/pixel/PSRed.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
-		"float4 PS() : SV_TARGET\n"
-		"{\n"
-		"	return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
-		"}\n");
-
-	createHLSLShader(pixelShaderGreen, L"resource/shaders/pixel/PSGreen.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
-		"float4 PS() : SV_TARGET\n"
-		"{\n"
-		"	return float4(0.0f, 1.0f, 0.0f, 1.0f);\n"
-		"}\n");
-
-	createHLSLShader(pixelShaderBlue, L"resource/shaders/pixel/PSBlue.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
-		"float4 PS() : SV_TARGET\n"
-		"{\n"
-		"	return float4(0.0f, 0.0f, 1.0f, 1.0f);\n"
-		"}\n");
+	createHLSLShader(pixelShaderRed, L"resource/shaders/pixel/PSRed.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr);
+	createHLSLShader(pixelShaderGreen, L"resource/shaders/pixel/PSGreen.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr);
+	createHLSLShader(pixelShaderBlue, L"resource/shaders/pixel/PSBlue.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr);
 
 	return true;
 }
 
 bool Graphics::createScene(class Window* window)
 {
-	createAndAttachVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
-
-	createAndAttachPixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
-
 	Vertex3 vertex(
 		Vertex(-0.5f, -0.5f),
 		Vertex( 0.0f,  0.5f),
@@ -191,7 +169,8 @@ void Graphics::setupShaders()
 
 void Graphics::setupScene()
 {
-	// coming soon 
+	setupVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
+	setupPixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
 }
 
 #pragma endregion SPECIFIC CORE SETUP
@@ -424,7 +403,7 @@ void Graphics::createHLSLShader(
 
 #pragma region SPECIFIC SCENE CREATION/INITIALIZATION
 
-void Graphics::createAndAttachVertexShader(
+void Graphics::setupVertexShader(
 	const void*				pShaderByteCode, 
 	SIZE_T					byteCodeLength, 
 	ID3D11ClassLinkage*		pClassLinkage,
@@ -434,7 +413,7 @@ void Graphics::createAndAttachVertexShader(
 	d3d11DeviceContext->VSSetShader(VS, 0, 0);
 }
 
-void Graphics::createAndAttachPixelShader(
+void Graphics::setupPixelShader(
 	const void*				pShaderByteCode, 
 	SIZE_T					byteCodeLength, 
 	ID3D11ClassLinkage*		pClassLinkage,

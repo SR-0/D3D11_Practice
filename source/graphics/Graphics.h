@@ -80,6 +80,7 @@ public:
 
 	/*
 		all specific core update functions called by the core 'update()' function
+		which is a core game/application loop function
 
 		|
 		|
@@ -94,6 +95,7 @@ public:
 
 	/*
 		all specific render functions called by the core 'render()' function
+		which is a core game/application loop function
 
 		|
 		|
@@ -214,21 +216,30 @@ private:
 		V
 	*/
 
-	void createAndAttachVertexShader(
+	void createVertexBuffer(Vertex vertex[]);
+	void createInputLayout();
+
+private:
+
+	/*
+		all specific setup functions called by the 'setupScene()' function
+
+		|
+		|
+		V
+	*/
+
+	void setupVertexShader(
 		const void*				pShaderByteCode, 
 		SIZE_T					byteCodeLength, 
 		ID3D11ClassLinkage*		pClassLinkage,
 		ID3D11VertexShader**	ppVertexShader);
 
-	void createAndAttachPixelShader(
+	void setupPixelShader(
 		const void*				pShaderByteCode, 
 		SIZE_T					byteCodeLength, 
 		ID3D11ClassLinkage*		pClassLinkage,
 		ID3D11PixelShader**		ppPixelShader);
-
-	void createVertexBuffer(Vertex vertex[]);
-
-	void createInputLayout();
 
 public: // specific update functions called by 'updateScene()'
 
