@@ -1,7 +1,14 @@
 #include "Graphics.h"
 
+
+
+
+
 // local includes
 #include "Window.h"
+#include "Shaders.h"
+
+
 
 
 
@@ -25,29 +32,53 @@ Graphics::~Graphics()
 
 
 
-#pragma region CREATE - SETUP - DESTROY
+
+
+#pragma region CORE CREATE - CORE SETUP - CORE UPDATE - CORE RENDER - CORE DESTROY
 
 void Graphics::create(Window* window)
 {
 	createGraphics(window);
+	createShaders();
 	createScene(window);
 }
 
 void Graphics::setup()
 {
-	// none atm
+	setupGraphics();
+	setupShaders();
+	setupScene();
+}
+
+void Graphics::update()
+{
+	updateGraphics();
+	updateShaders();
+	updateScene();
+}
+
+void Graphics::render()
+{
+	clear();
+	draw();
+	display();
 }
 
 void Graphics::destroy()
 {
-	destroyCOMObjects();
+	destroyGraphics();
+	destroyShaders();
+	destroyScene();
 }
 
-#pragma endregion CREATE - SETUP - DESTROY
+#pragma endregion CORE CREATE - CORE SETUP - CORE UPDATE - CORE RENDER - CORE DESTROY
 
 
 
-#pragma region CORE INITIALIZATION/CREATION
+
+
+
+#pragma region SPECIFIC CORE CREATION/INITIALIZATION
 
 bool Graphics::createGraphics(class Window* window)
 {
@@ -91,57 +122,188 @@ bool Graphics::createGraphics(class Window* window)
 	return true;
 }
 
-bool Graphics::createScene(class Window* window)
+bool Graphics::createShaders()
 {
-	// compile shaders from shader file
-	hResult = D3DCompileFromFile(L"resource/shaders/VSTest.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr);
-	hResult = D3DCompileFromFile(L"resource/shaders/PSTest.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr);
+	// vertext shader creation/initialization
+	VertexShader1 = new HLSLShader;
+	VertexShader1->createHLSLFile(L"resource/shaders/VS1.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr,
 
-	// create the shader objects
-	hResult = d3d11Device->CreateVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
-	hResult = d3d11Device->CreatePixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
+		"float4 VS(float4 inPos : POSITION) : SV_POSITION\n"
+		"{\n"
+		"	return inPos;\n"
+		"};\n"
 
-	// set vertex and pixel shaders
-	d3d11DeviceContext->VSSetShader(VS, 0, 0);
-	d3d11DeviceContext->PSSetShader(PS, 0, 0);
+	);
 
-	// create vertex buffer
-	Vertex vertex[] =
-	{
-		Vertex(-0.5f, -0.5f),
-		Vertex( 0.0f,  0.5f),
-		Vertex( 0.5f, -0.5f)
-	};
+	// pixel shader creation/initialization
+	PixelShaderRed = new HLSLShader;
+	PixelShaderRed->createHLSLFile(L"resource/shaders/PSRed.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
 
-	D3D11_BUFFER_DESC vertexBufferDescription;
-	ZeroMemory(&vertexBufferDescription, sizeof(D3D11_BUFFER_DESC));
+		"float4 PS() : SV_TARGET\n"
+		"{\n"
+		"	return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+		"}\n"
 
-	vertexBufferDescription.Usage			= D3D11_USAGE_DEFAULT;
-	vertexBufferDescription.ByteWidth		= sizeof(Vertex) * 3;
-	vertexBufferDescription.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDescription.CPUAccessFlags	= 0;
-	vertexBufferDescription.MiscFlags		= 0;
+	);
 
-	D3D11_SUBRESOURCE_DATA vertexBufferData;
-	ZeroMemory(&vertexBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
-	vertexBufferData.pSysMem = vertex;
-	hResult = d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &triangleVertBuffer);
+	PixelShaderGreen = new HLSLShader;
+	PixelShaderGreen->createHLSLFile(L"resource/shaders/PSGrean.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
 
-	// create input layout
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA },
-	};
-	hResult = d3d11Device->CreateInputLayout(layout, 1, VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), &vertLayout);
+		"float4 PS() : SV_TARGET\n"
+		"{\n"
+		"	return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+		"}\n"
+
+	);
+
+	PixelShaderBlue = new HLSLShader;
+	PixelShaderBlue->createHLSLFile(L"resource/shaders/PSBlue.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
+
+		"float4 PS() : SV_TARGET\n"
+		"{\n"
+		"	return float4(0.0f, 0.0f, 1.0f, 1.0f);\n"
+		"}\n"
+
+	);
 
 	return true;
 }
 
-#pragma endregion CORE INITIALIZATION/CREATION
+bool Graphics::createScene(class Window* window)
+{
+	createCompiledShaders();
+
+	createAndAttachVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
+
+	createAndAttachPixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
+
+	Vertex3 vertex(
+		Vertex(-0.5f, -0.5f),
+		Vertex( 0.0f,  0.5f),
+		Vertex( 0.5f, -0.5f));
+
+	createVertexBuffer(vertex.vertices);
+
+	createInputLayout();
+
+	return true;
+}
+
+#pragma endregion SPECIFIC CORE CREATION/INITIALIZATION
 
 
 
-#pragma region Graphics INITIALIZATION/CREATION
+
+
+#pragma region SPECIFIC CORE SETUP
+
+void Graphics::setupGraphics()
+{
+	// coming soon 
+}
+
+void Graphics::setupShaders()
+{
+	// coming soon 
+}
+
+void Graphics::setupScene()
+{
+	// coming soon 
+}
+
+#pragma endregion SPECIFIC CORE SETUP
+
+
+
+
+
+#pragma endregion SPECIFIC CORE UPDATE
+
+void Graphics::updateGraphics()
+{
+	// coming soon 
+}
+
+void Graphics::updateShaders()
+{
+	// coming soon 
+}
+
+void Graphics::updateScene()
+{
+	updateBackgroundColor();
+}
+
+#pragma endregion SPECIFIC CORE UPDATE
+
+
+
+
+
+#pragma region SPECIFIC CORE RENDER
+
+void Graphics::clear()
+{
+	const float backgroundColor[4] = { color.r, color.g, color.b, color.a };
+	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
+}
+
+void Graphics::draw()
+{
+	drawTriangle();
+}
+
+void Graphics::display()
+{
+	swapChain->Present(0, 0);
+}
+
+#pragma endregion SPECIFIC CORE RENDER
+
+
+
+
+
+#pragma region SPECIFIC CORE DESTROY
+
+void Graphics::destroyGraphics()
+{
+	swapChain->Release();
+	d3d11Device->Release();
+	d3d11DeviceContext->Release();
+	backBuffer->Release();
+	renderTargetView->Release();
+}
+
+void Graphics::destroyShaders()
+{
+	// vertex shader destruction
+	delete VertexShader1;
+
+	// pixel shader destruction
+	delete PixelShaderRed;
+	delete PixelShaderBlue;
+	delete PixelShaderGreen;
+}
+
+void Graphics::destroyScene()
+{
+	triangleVertBuffer->Release();
+	VS->Release();
+	PS->Release();
+	VS_Buffer->Release();
+	PS_Buffer->Release();
+	vertLayout->Release();
+}
+
+#pragma endregion SPECIFIC CORE DESTROY
+
+
+
+
+
+#pragma region SPECIFIC GRAPHICS CREATION/INITIALIZATION
 
 void Graphics::createBufferDescription(
 	unsigned int				width,
@@ -229,49 +391,80 @@ void Graphics::createRenderTargetView(
 	backBuffer->Release();
 }
 
-#pragma endregion Graphics INITIALIZATION/CREATION
+#pragma endregion SPECIFIC GRAPHICS CREATION/INITIALIZATION
 
 
 
-#pragma region SCENE INITIALIZATION/CREATION
+
+
+#pragma region SPECIFIC SHADER CREATION/INITIALIZATION
+
+// possible
+
+#pragma endregion SPECIFIC SHADER CREATION/INITIALIZATION
+
+
+
+
+
+#pragma region SPECIFIC SCENE CREATION/INITIALIZATION
+
+void Graphics::createCompiledShaders()
+{
+	VertexShader1->compile();
+	PixelShaderBlue->compile();
+}
+
+void Graphics::createAndAttachVertexShader(
+	const void*				pShaderByteCode, 
+	SIZE_T					byteCodeLength, 
+	ID3D11ClassLinkage*		pClassLinkage,
+	ID3D11VertexShader**	ppVertexShader)
+{
+	hResult = d3d11Device->CreateVertexShader(pShaderByteCode, byteCodeLength, pClassLinkage, ppVertexShader);
+	d3d11DeviceContext->VSSetShader(VS, 0, 0);
+}
+
+void Graphics::createAndAttachPixelShader(
+	const void*				pShaderByteCode, 
+	SIZE_T					byteCodeLength, 
+	ID3D11ClassLinkage*		pClassLinkage,
+	ID3D11PixelShader**		ppPixelShader)
+{
+	hResult = d3d11Device->CreatePixelShader(pShaderByteCode, byteCodeLength, pClassLinkage, ppPixelShader);
+	d3d11DeviceContext->PSSetShader(PS, 0, 0);
+}
+
+void Graphics::createVertexBuffer(Vertex vertex[])
+{
+	D3D11_BUFFER_DESC vertexBufferDescription;
+	ZeroMemory(&vertexBufferDescription, sizeof(D3D11_BUFFER_DESC));
+
+	vertexBufferDescription.Usage			= D3D11_USAGE_DEFAULT;
+	vertexBufferDescription.ByteWidth		= sizeof(Vertex) * 3;
+	vertexBufferDescription.BindFlags		= D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDescription.CPUAccessFlags	= 0;
+	vertexBufferDescription.MiscFlags		= 0;
+
+	D3D11_SUBRESOURCE_DATA vertexBufferData;
+	ZeroMemory(&vertexBufferData, sizeof(D3D11_SUBRESOURCE_DATA));
+	vertexBufferData.pSysMem = vertex;
+	hResult = d3d11Device->CreateBuffer(&vertexBufferDescription, &vertexBufferData, &triangleVertBuffer);
+}
 
 void Graphics::createInputLayout()
 {
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA },
+	};
+	hResult = d3d11Device->CreateInputLayout(layout, 1, VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), &vertLayout);
 }
 
-#pragma endregion SCENE INITIALIZATION/CREATION
-
-
-
-void Graphics::destroyCOMObjects()
-{
-	swapChain->Release();
-	d3d11Device->Release();
-	d3d11DeviceContext->Release();
-	renderTargetView->Release();
-	triangleVertBuffer->Release();
-	VS->Release();
-	PS->Release();
-	VS_Buffer->Release();
-	PS_Buffer->Release();
-	vertLayout->Release();
-}
-
-void Graphics::update()
-{
-	updateBackgroundColor();
-}
-
-void Graphics::render()
-{
-	clear();
-	draw();
-	display();
-}
+#pragma endregion SPECIFIC SCENE CREATION/INITIALIZATION
 
 void Graphics::updateBackgroundColor()
 {
-	// update silly colors
 	color.r += colorModifier.r * 0.00005f;
 	color.g += colorModifier.g * 0.00002f;
 	color.b += colorModifier.b * 0.00001f;
@@ -290,25 +483,6 @@ void Graphics::updateBackgroundColor()
 	{
 		colorModifier.b *= -1;
 	}
-}
-
-void Graphics::clear()
-{
-	// clear backbuffer to updated color
-	const FLOAT backgroundColor[4] = { color.r, color.g, color.b, color.a };
-	d3d11DeviceContext->ClearRenderTargetView(renderTargetView, backgroundColor);
-}
-
-void Graphics::draw()
-{
-	// draw scene
-	drawTriangle();
-}
-
-void Graphics::display()
-{
-	// present backbuffer to screen
-	swapChain->Present(0, 0);
 }
 
 void Graphics::drawTriangle()

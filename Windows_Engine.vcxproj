@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\graphics\Shaders.cpp" />
     <ClCompile Include="source\core\Engine.cpp" />
     <ClCompile Include="source\graphics\Graphics.cpp" />
     <ClCompile Include="source\core\winMain.cpp">
@@ -159,6 +160,7 @@
     <ClCompile Include="source\window\WindowsMessageMap.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\graphics\Shaders.h" />
     <ClInclude Include="source\core\Engine.h" />
     <ClInclude Include="source\common\CustomTypes.h" />
     <ClInclude Include="source\graphics\Graphics.h" />

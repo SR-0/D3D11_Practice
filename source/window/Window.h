@@ -16,13 +16,13 @@ public:
 
 private:
 
-	bool initialize(
+	bool create(
 		HINSTANCE&   hInstance,
 		unsigned int width,
 		unsigned int height,
 		bool         isFullscreen);
 
-public:
+private:
 
 	static LRESULT CALLBACK wndProc(
 		HWND   hWnd,

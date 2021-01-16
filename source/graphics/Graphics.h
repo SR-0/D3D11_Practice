@@ -1,36 +1,132 @@
 #pragma once
 
+
+
 // lib links
 #pragma comment( lib, "d3d11.lib" )
 #pragma comment( lib, "d3d10.lib" )
 #pragma comment( lib, "d3dcompiler.lib" )
 
+
+
 // d3d includes
 #include <d3d11.h>
 #include <d3dcompiler.h>
 
+
+
 // local includes
 #include "CustomTypes.h"
 
+
+
 class Graphics
 {
-public: // constructors and destructors
+public:
 
 	Graphics(class Window* window);
 	~Graphics();
 
-public: // all initialization/creation, setup, and destruction encapsulated and called by Graphics() and ~Graphics()
+public: 
+	
+	/* 
+		all creation/initialization, setup, update, render, and 
+		destruction related functions will be called by these 
+		five functions which are in turn going to be called by 
+		Graphics() and ~Graphics() constructor and deconstructor
+		excluding update() and render() functions which are meant
+		to be called after creation in specified game/application loop
+
+		|
+		|
+		V
+	*/
 
 	void create(class Window* window);
 	void setup();
+	void update(); 
+	void render(); 
 	void destroy();
 
-private: // core specific initialization/creation functions called by 'create()'
+private:
+
+	/*
+		all specific core creation/initialization functions called by the core 'create()' function
+
+		|
+		|
+		V
+	*/
 
 	bool createGraphics(class Window* window);
+	bool createShaders();
 	bool createScene(class Window* window);
 
-private: // specific initialization/creation functions called by 'createGraphics()'
+private:
+
+	/*
+		all specific core setup functions called by the core 'setup()' function
+
+		|
+		|
+		V
+	*/
+
+	void setupGraphics();
+	void setupShaders();
+	void setupScene();
+
+public:
+
+	/*
+		all specific core update functions called by the core 'update()' function
+
+		|
+		|
+		V
+	*/
+
+	void updateGraphics();
+	void updateShaders();
+	void updateScene();
+
+public:
+
+	/*
+		all specific render functions called by the core 'render()' function
+
+		|
+		|
+		V
+	*/
+
+	void clear();
+	void draw();
+	void display();
+
+private:
+
+	/*
+		all specific destroy functions called by the core 'destroy()' function
+
+		|
+		|
+		V
+	*/
+
+	void destroyGraphics();
+	void destroyShaders();
+	void destroyScene();
+
+private:
+
+	/*
+		all specific creation/initialization functions called by the 'createGraphics()' function
+
+		|
+		|
+		V
+	*/
 
 	void createBufferDescription(
 		unsigned int				width,
@@ -72,43 +168,64 @@ private: // specific initialization/creation functions called by 'createGraphics
 		D3D11_RENDER_TARGET_VIEW_DESC*	pDescription,
 		ID3D11RenderTargetView**		ppRenderTargetView);
 
-private: // specific initialization/creation functions called by 'createScene()'
+private:
+
+	/*
+		all specific creation/initialization functions called by the 'createScene()' function
+
+		|
+		|
+		V
+	*/
+
+	void createCompiledShaders();
+
+	void createAndAttachVertexShader(
+		const void*				pShaderByteCode, 
+		SIZE_T					byteCodeLength, 
+		ID3D11ClassLinkage*		pClassLinkage,
+		ID3D11VertexShader**	ppVertexShader);
+
+	void createAndAttachPixelShader(
+		const void*				pShaderByteCode, 
+		SIZE_T					byteCodeLength, 
+		ID3D11ClassLinkage*		pClassLinkage,
+		ID3D11PixelShader**		ppPixelShader);
+
+	void createVertexBuffer(Vertex vertex[]);
 
 	void createInputLayout();
 
-private: // specific setup functions called by 'setup()'
+public: // specific update functions called by 'updateScene()'
 
-	// empty atm
+	/*
+		all specific update functions called by the 'updateScene()' function
 
-private: // core specific destruction functions called by 'destroy()'
-
-	void destroyCOMObjects();
-
-public: // all update & render encapsulation
-
-	void update(); 
-	void render(); 
-
-public: // specific update functions called by 'update()'
+		|
+		|
+		V
+	*/
 
 	void updateBackgroundColor();
 
-public: // specific render functions called by 'render()'
+public:
 
-	void clear();
-	void draw();
-	void display();
+	/*
+		all specific draw functions called by the 'draw()' function
 
-public: // specific draw functions called by 'draw()'
+		|
+		|
+		V
+	*/
 
 	void drawTriangle();
 
-private: // all DXGI decription objects
+private: // DXGI decription objects
 
 	DXGI_MODE_DESC			bufferDescription;
 	DXGI_SWAP_CHAIN_DESC	swapChainDescription;
 
-private: // all D3D11/D3D10 core objects
+private: // D3D11/D3D10 core objects
 
 	ID3D11Texture2D*			backBuffer			= nullptr;
 	IDXGISwapChain*				swapChain			= nullptr;
@@ -123,8 +240,17 @@ private: // all D3D11/D3D10 core objects
 	ID3D10Blob*					PS_Buffer			= nullptr;
 	ID3D11InputLayout*          vertLayout			= nullptr;
 
-private: // misc variables/objects
+private: // HLSLShader objects
 
+	// vertex shaders
+	class HLSLShader* VertexShader1;
+
+	// pixel shaders
+	class HLSLShader* PixelShaderRed;
+	class HLSLShader* PixelShaderBlue;
+	class HLSLShader* PixelShaderGreen;
+
+private: // misc variables/objects
 	
 	Color	color;
 	Color	colorModifier;

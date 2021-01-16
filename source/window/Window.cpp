@@ -15,14 +15,14 @@ Window::Window(
 	width(width),
 	height(height)
 {
-	initialize(hInstance, width, height, isFullscreen);
+	create(hInstance, width, height, isFullscreen);
 }
 
 Window::~Window()
 {
 }
 
-bool Window::initialize(
+bool Window::create(
 	HINSTANCE&   hInstance,
 	unsigned int width,
 	unsigned int height,
