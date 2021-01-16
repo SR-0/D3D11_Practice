@@ -171,14 +171,48 @@ private:
 private:
 
 	/*
-		all specific creation/initialization functions called by the 'createScene()' function
+		all specific creation/initialization functions called by the 'createShaders()' function
 
 		|
 		|
 		V
 	*/
 
-	void createCompiledShaders();
+	void createHLSLShader(
+		class HLSLShader*		pHLSLShader,
+		LPCWSTR					pFileLocation, 
+		const D3D_SHADER_MACRO* pDefines, 
+		ID3DInclude*			pInclude,
+		LPCSTR					pEntryPoint,
+		LPCSTR					pTarget,
+		UINT					flag1,
+		UINT					flag2,
+		ID3DBlob**				ppCode,
+		ID3DBlob**				ppErrorMessages);
+
+	void createHLSLShader(
+		class HLSLShader*		pHLSLShader,
+		LPCWSTR					pNewFileLocation, 
+		const D3D_SHADER_MACRO* pDefines, 
+		ID3DInclude*			pInclude,
+		LPCSTR					pEntryPoint,
+		LPCSTR					pTarget,
+		UINT					flag1,
+		UINT					flag2,
+		ID3DBlob**				ppCode,
+		ID3DBlob**				ppErrorMessages,
+		bool					overridePreviousCode,
+		std::string				HLSLCode);
+
+private:
+
+	/*
+		all specific creation/initialization functions called by the 'createScene()' function
+
+		|
+		|
+		V
+	*/
 
 	void createAndAttachVertexShader(
 		const void*				pShaderByteCode, 
@@ -243,12 +277,12 @@ private: // D3D11/D3D10 core objects
 private: // HLSLShader objects
 
 	// vertex shaders
-	class HLSLShader* VertexShader1;
+	class HLSLShader* vertexShader1;
 
 	// pixel shaders
-	class HLSLShader* PixelShaderRed;
-	class HLSLShader* PixelShaderBlue;
-	class HLSLShader* PixelShaderGreen;
+	class HLSLShader* pixelShaderRed;
+	class HLSLShader* pixelShaderBlue;
+	class HLSLShader* pixelShaderGreen;
 
 private: // misc variables/objects
 	

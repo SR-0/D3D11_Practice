@@ -27,7 +27,7 @@ public:
 
 public:
 
-	void createHLSLFile(
+	bool createHLSLFile(
 		LPCWSTR					pNewFileLocation, 
 		const D3D_SHADER_MACRO* pDefines, 
 		ID3DInclude*			pInclude,
@@ -37,6 +37,7 @@ public:
 		UINT					flag2,
 		ID3DBlob**				ppCode,
 		ID3DBlob**				ppErrorMessages,
+		bool					overridePreviousCode,
 		std::string				HLSLCode);
 
 	void createHLSLFileAndCompile(
@@ -49,6 +50,7 @@ public:
 		UINT					flag2,
 		ID3DBlob**				ppCode,
 		ID3DBlob**				ppErrorMessages,
+		bool					overridePreviousCode,
 		std::string				HLSLCode);
 
 public:

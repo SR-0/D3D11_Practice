@@ -125,54 +125,36 @@ bool Graphics::createGraphics(class Window* window)
 bool Graphics::createShaders()
 {
 	// vertext shader creation/initialization
-	VertexShader1 = new HLSLShader;
-	VertexShader1->createHLSLFile(L"resource/shaders/VS1.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr,
-
+	createHLSLShader(vertexShader1, L"resource/shaders/vertex/VSBasic.hlsl", nullptr, nullptr, "VS", "vs_5_0", 0, 0, &VS_Buffer, nullptr, false,
 		"float4 VS(float4 inPos : POSITION) : SV_POSITION\n"
 		"{\n"
 		"	return inPos;\n"
-		"};\n"
-
-	);
+		"};\n");
 
 	// pixel shader creation/initialization
-	PixelShaderRed = new HLSLShader;
-	PixelShaderRed->createHLSLFile(L"resource/shaders/PSRed.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
-
+	createHLSLShader(pixelShaderRed, L"resource/shaders/pixel/PSRed.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
 		"float4 PS() : SV_TARGET\n"
 		"{\n"
 		"	return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
-		"}\n"
+		"}\n");
 
-	);
-
-	PixelShaderGreen = new HLSLShader;
-	PixelShaderGreen->createHLSLFile(L"resource/shaders/PSGrean.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
-
+	createHLSLShader(pixelShaderGreen, L"resource/shaders/pixel/PSGreen.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
 		"float4 PS() : SV_TARGET\n"
 		"{\n"
-		"	return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
-		"}\n"
+		"	return float4(0.0f, 1.0f, 0.0f, 1.0f);\n"
+		"}\n");
 
-	);
-
-	PixelShaderBlue = new HLSLShader;
-	PixelShaderBlue->createHLSLFile(L"resource/shaders/PSBlue.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr,
-
+	createHLSLShader(pixelShaderBlue, L"resource/shaders/pixel/PSBlue.hlsl", nullptr, nullptr, "PS", "ps_5_0", 0, 0, &PS_Buffer, nullptr, false,
 		"float4 PS() : SV_TARGET\n"
 		"{\n"
 		"	return float4(0.0f, 0.0f, 1.0f, 1.0f);\n"
-		"}\n"
-
-	);
+		"}\n");
 
 	return true;
 }
 
 bool Graphics::createScene(class Window* window)
 {
-	createCompiledShaders();
-
 	createAndAttachVertexShader(VS_Buffer->GetBufferPointer(), VS_Buffer->GetBufferSize(), NULL, &VS);
 
 	createAndAttachPixelShader(PS_Buffer->GetBufferPointer(), PS_Buffer->GetBufferSize(), NULL, &PS);
@@ -279,12 +261,12 @@ void Graphics::destroyGraphics()
 void Graphics::destroyShaders()
 {
 	// vertex shader destruction
-	delete VertexShader1;
+	delete vertexShader1;
 
 	// pixel shader destruction
-	delete PixelShaderRed;
-	delete PixelShaderBlue;
-	delete PixelShaderGreen;
+	delete pixelShaderRed;
+	delete pixelShaderBlue;
+	delete pixelShaderGreen;
 }
 
 void Graphics::destroyScene()
@@ -399,7 +381,40 @@ void Graphics::createRenderTargetView(
 
 #pragma region SPECIFIC SHADER CREATION/INITIALIZATION
 
-// possible
+void Graphics::createHLSLShader(
+	HLSLShader*				pHLSLShader,
+	LPCWSTR					pFileLocation, 
+	const D3D_SHADER_MACRO* pDefines, 
+	ID3DInclude*			pInclude,
+	LPCSTR					pEntryPoint,
+	LPCSTR					pTarget,
+	UINT					flag1,
+	UINT					flag2,
+	ID3DBlob**				ppCode,
+	ID3DBlob**				ppErrorMessages)
+{
+	pHLSLShader = new HLSLShader(pFileLocation, pDefines, pInclude, pEntryPoint, pTarget, flag1, flag2, ppCode, ppErrorMessages);
+	pHLSLShader->compile();
+}
+
+void Graphics::createHLSLShader(
+	class HLSLShader*		pHLSLShader,
+	LPCWSTR					pNewFileLocation, 
+	const D3D_SHADER_MACRO* pDefines, 
+	ID3DInclude*			pInclude,
+	LPCSTR					pEntryPoint,
+	LPCSTR					pTarget,
+	UINT					flag1,
+	UINT					flag2,
+	ID3DBlob**				ppCode,
+	ID3DBlob**				ppErrorMessages,
+	bool					overridePreviousCode,
+	std::string				HLSLCode)
+{
+	pHLSLShader = new HLSLShader;
+	pHLSLShader->createHLSLFile(pNewFileLocation, pDefines, pInclude, pEntryPoint, pTarget, flag1, flag2, ppCode, ppErrorMessages, overridePreviousCode, HLSLCode);
+	pHLSLShader->compile();
+}
 
 #pragma endregion SPECIFIC SHADER CREATION/INITIALIZATION
 
@@ -408,12 +423,6 @@ void Graphics::createRenderTargetView(
 
 
 #pragma region SPECIFIC SCENE CREATION/INITIALIZATION
-
-void Graphics::createCompiledShaders()
-{
-	VertexShader1->compile();
-	PixelShaderBlue->compile();
-}
 
 void Graphics::createAndAttachVertexShader(
 	const void*				pShaderByteCode, 

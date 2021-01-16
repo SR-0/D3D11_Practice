@@ -32,7 +32,7 @@ HLSLShader::~HLSLShader()
 {
 }
 
-void HLSLShader::createHLSLFile(
+bool HLSLShader::createHLSLFile(
 	LPCWSTR					pNewFileLocation, 
 	const D3D_SHADER_MACRO* pDefines, 
 	ID3DInclude*			pInclude,
@@ -42,6 +42,7 @@ void HLSLShader::createHLSLFile(
 	UINT					flag2,
 	ID3DBlob**				ppCode,
 	ID3DBlob**				ppErrorMessages,
+	bool					overridePreviousCode,
 	std::string				HLSLCode)
 {
 	this->pFileLocation		= pNewFileLocation;
@@ -54,17 +55,49 @@ void HLSLShader::createHLSLFile(
 	this->ppCode			= ppCode;
 	this->ppErrorMessages	= ppErrorMessages;
 
-	output.open(pFileLocation);
+	LPCWSTR path = pNewFileLocation;
+	
+	input = std::ifstream(pNewFileLocation);
 
-	while (output.is_open())
+	if (input.is_open())
 	{
-		for (unsigned int i = 0; i < HLSLCode.size(); i++)
-		{
-			output << HLSLCode[i];
-		}
+		input.close();
 
-		output.close();
+		if (overridePreviousCode)
+		{
+			output.open(pNewFileLocation);
+
+			while (output.is_open())
+			{
+				for (unsigned int i = 0; i < HLSLCode.size(); i++)
+				{
+					output << HLSLCode[i];
+				}
+
+				output.close();
+			}
+		}
+		else
+		{
+			MessageBoxEx(0, L"Shader File Creation - Failed (Already exists)\n\nIgnore by changing 'overridePreviousCode' argument to 'true' or\nremove last argument in 'createHLSLFile()' function parameters \n to attach existing HLSL shader file", L"Warning", MB_OK, CAL_GREGORIAN_XLIT_ENGLISH);
+		}
 	}
+	else
+	{
+		output.open(pNewFileLocation);
+
+		while (output.is_open())
+		{
+			for (unsigned int i = 0; i < HLSLCode.size(); i++)
+			{
+				output << HLSLCode[i];
+			}
+
+			output.close();
+		}
+	}
+
+	return true;
 }
 
 void HLSLShader::createHLSLFileAndCompile(
@@ -77,6 +110,7 @@ void HLSLShader::createHLSLFileAndCompile(
 	UINT					flag2,
 	ID3DBlob**				ppCode,
 	ID3DBlob**				ppErrorMessages,
+	bool					overridePreviousCode,
 	std::string				HLSLCode)
 {
 	createHLSLFile(
@@ -89,6 +123,7 @@ void HLSLShader::createHLSLFileAndCompile(
 		flag2,
 		ppCode,
 		ppErrorMessages,
+		overridePreviousCode,
 		HLSLCode);
 
 	compile();
